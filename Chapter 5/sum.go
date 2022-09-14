@@ -32,5 +32,3 @@ func SumAllTails(numbersToSum ...[]int) []int {
 
 	return sums
 }
-
-// test comments
