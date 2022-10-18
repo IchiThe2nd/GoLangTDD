@@ -1,21 +1,55 @@
 package main
 
-import "reflect"
+import (
+	"reflect"
+)
 
-// walk accepts an interface{} and func(input string). we are passing it a struct{} and
-// func(input string) [an empty func with a string input declaration]
-// so fn := func(input string) // as passed from TestWalk and as defined here
-// how does fn(return "Chris") modify input.
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+	val := getValue(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		//field is now chris or london depending on i
-		field := val.Field(i)
-		// how is below assining things to input? what is this doing?
-		//test case below shoul now be fn("Chris") for i=0. is input being
-		//redeclared/assigned inside the fn() call. I think im missing a key concept
-		// around the value of input
-		fn(field.String())
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
 	}
+
+	switch val.Kind() {
+	case reflect.String:
+		//Figure this part out. Its either a wierd reflect interaction or something important I am missing!!
+		// how does this change var input inside testWalk function. Alos fn is a func(input string) but has not been defined??
+		//(gets generic func(input string)from testWalk and then changes input to val.String()
+		fn(val.String())
+
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
+
+	case reflect.Chan:
+		// below for Recv has values : true , v , ok are values again
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
+			walkValue(v)
+		}
+
+	case reflect.Func:
+		valFnResult := val.Call(nil)
+		for _, res := range valFnResult {
+			walkValue(res)
+		}
+	}
+
+}
+
+func getValue(x interface{}) reflect.Value {
+	val := reflect.ValueOf(x)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	return val
 }
