@@ -16,7 +16,7 @@ func FileSystemPlayerStoreFromFilePath(path string) (*FileSystemPlayerStore, fun
 	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("Problem oipening %s,%v", path, err)
+		return nil, nil, fmt.Errorf("problem oipening %s,%v", path, err)
 	}
 	closeFunc := func() {
 		db.Close()
