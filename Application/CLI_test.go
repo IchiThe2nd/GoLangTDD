@@ -1,32 +1,34 @@
 //test CLI allows input ans stores as PlayerStore
 
-package poker
+package poker_test
 
 import (
+	"poker"
 	"strings"
 	"testing"
 )
 
+// CLI_test.go
 func TestCLI(t *testing.T) {
 
-	t.Run("record chris wins from input", func(t *testing.T) {
-		in := strings.NewReader("Chris wins\n") //an *io.Reader
-		playerStore := &StubPlayerStore{}
+	t.Run("record chris win from user input", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
 
-		cli := &CLI{playerStore, in} //CLI is going to be struct with fdield of playerStore?
-		cli.PlayPoker()              //call a method that awaits input and sends to updates playerstore field of cli
+		cli := poker.NewCLI(playerStore, in)
+		cli.PlayPoker()
 
-		assertPlayerWin(t, playerStore, "Chris")
+		poker.AssertPlayerWin(t, playerStore, "Chris")
 	})
+	/*
+		t.Run("record cleo win from user input", func(t *testing.T) {
+			in := strings.NewReader("Cleo wins\n")
+			playerStore := &poker.StubPlayerStore{}
 
-	t.Run("record Cleo wins from input", func(t *testing.T) {
-		in := strings.NewReader("Cleo wins\n") //an *io.Reader
-		playerStore := &StubPlayerStore{}
+			cli := &poker.CLI{playerStore, in}
+			cli.PlayPoker()
 
-		cli := &CLI{playerStore, in} //CLI is going to be struct with fdield of playerStore?
-		cli.PlayPoker()              //call a method that awaits input and sends to updates playerstore field of cli
-
-		assertPlayerWin(t, playerStore, "Cleo")
-	})
-
+			poker.AssertPlayerWin(t, playerStore, "Cleo")
+		})
+	*/
 }
