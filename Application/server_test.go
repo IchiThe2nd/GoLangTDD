@@ -93,10 +93,20 @@ func TestStoreWins(t *testing.T) {
 		if len(store.winCalls) != 1 {
 			t.Errorf("got %d calls to record wiun want %d", len(store.winCalls), 1)
 		}
-		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner got %q wanted %q", store.winCalls[0], player)
-		}
+		//assert this
+		assertPlayerWin(t, &store, player)
 	})
+}
+
+func assertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
+	t.Helper()
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to record wins wante %d", len(store.winCalls), 1)
+	}
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q wanted %q", store.winCalls[0], winner)
+
+	}
 }
 
 func newPostWinRequest(name string) *http.Request {
