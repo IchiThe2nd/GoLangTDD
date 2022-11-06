@@ -2,33 +2,49 @@ package poker
 
 import (
 	"bufio"
+	"fmt"
 	"io"
+	"strconv"
 	"strings"
-	"time"
 )
 
 type CLI struct {
-	playerStore PlayerStore
-	in          *bufio.Scanner
-	alerter     BlindAlerter
+	in   *bufio.Scanner
+	out  io.Writer
+	game Game
 }
 
-func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
+func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	return &CLI{
-		playerStore: store,
-		in:          bufio.NewScanner(in),
-		alerter:     alerter,
+		in:   bufio.NewScanner(in),
+		out:  out,
+		game: game,
 	}
 }
 
+// PlayerPrompt is the text asking the user for the number of players.
+const PlayerPrompt = "Please enter the number of players: "
+
+// BadPlayerInputErrMsg is the text telling the user they did bad things.
+const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+
+// BadWinnerInputMsg is the text telling the user they declared the winner wrong.
+const BadWinnerInputMsg = "invalid winner input, expect format of 'PlayerName wins'"
+
 func (cli *CLI) PlayPoker() {
+	fmt.Fprint(cli.out, PlayerPrompt)
+	numberOfPlayersInput := cli.readLine()
+	numberOfPlayers, err := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n")) //we dont need errors!
 
-	blindtime := 5 * time.Second
-	blind := 100
-	cli.alerter.ScheduleAlertAt(blindtime, blind)
+	if err != nil {
+		fmt.Fprint(cli.out, "your so silly")
+		return
+	}
 
-	userInput := cli.readLine()
-	cli.playerStore.RecordWin(extractWinner(userInput))
+	cli.game.Start(numberOfPlayers)
+
+	winnerInput := cli.readLine()
+	cli.game.Finish(extractWinner(winnerInput))
 }
 
 func extractWinner(userInput string) string {
