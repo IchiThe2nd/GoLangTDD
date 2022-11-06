@@ -72,7 +72,7 @@ func TestCLI(t *testing.T) {
 
 	t.Run("prints an error if non-numeric value entered", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
-		in := strings.NewReader("Pies\n")
+		in := userSends("Pies")
 		game := &GameSpy{}
 
 		cli := poker.NewCLI(in, stdout, game)
