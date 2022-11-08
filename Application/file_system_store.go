@@ -44,7 +44,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 		return nil, fmt.Errorf("problem loading the player store from file %s , %v", file.Name(), err)
 	}
 	return &FileSystemPlayerStore{
-		database: json.NewEncoder(&tape{file}),
+		database: json.NewEncoder(&Tape{file}),
 		league:   league,
 	}, nil
 }
@@ -92,19 +92,3 @@ func initialisePlayerDBFile(file *os.File) error {
 	}
 	return nil
 }
-
-/* REVIEW BELOW when You get a chance
-//range through  the League( returned from league) and increment wins
-	league := f.GetLeague()
-	for i, player := range league {
-		if player.Name == name {
-			//player.Name is a copy from league..(why cant I us e &player.Wins++)
-			league[i].Wins++
-			//&player.Wins = &player.Wins + 1
-		}
-	}
-	//reset db seeker back
-	f.database.Seek(0, 0)
-	json.NewEncoder(f.database).Encode(league)
-
-*/

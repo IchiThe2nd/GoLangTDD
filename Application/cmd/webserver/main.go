@@ -4,22 +4,34 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"poker"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-	store, close, err := poker.FileSystemPlayerStoreFromFilePath(dbFileName)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal(err) // info shoul be carried over from any erros created in above?
+		log.Fatalf("Problem opening file %s %v", dbFileName, err)
 	}
-	defer close()
 
-	server := poker.NewPlayerServer(store)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
+	if err != nil {
+		log.Fatalf("Problem creating stopre %s %v", store, err)
 	}
+
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
+
+	server, err := poker.NewPlayerServer(store, game)
+
+	if err != nil {
+
+		log.Fatalf("Problem creating PlayerServer %v", err)
+	}
+
+	log.Fatal(http.ListenAndServe(":5000", server))
+
 }

@@ -26,7 +26,7 @@ type GameSpy struct {
 	FinishCalledWith string
 }
 
-func (g *GameSpy) Start(numberOfPlayers int) {
+func (g *GameSpy) Start(numberOfPlayers int, alertsDestination io.Writer) {
 	g.StartCalledWith = numberOfPlayers
 	g.StartCalled = true
 }
@@ -59,15 +59,16 @@ func TestCLI(t *testing.T) {
 
 	t.Run("Start game with 8 players ands Cleo as wins", func(t *testing.T) {
 		game := &GameSpy{}
+		out := &bytes.Buffer{}
 
 		in := userSends("8", "Cleo wins")
 
-		cli := poker.NewCLI(in, dummyStdOut, game)
-
-		cli.PlayPoker()
+		poker.NewCLI(in, out, game).PlayPoker()
 
 		assertGameStartedWith(t, game, 8)
 		assertFinishCalledWith(t, game, "Cleo")
+
+		assertMessagesSentToUser(t, out, poker.PlayerPrompt)
 	})
 
 	t.Run("prints an error if non-numeric value entered", func(t *testing.T) {

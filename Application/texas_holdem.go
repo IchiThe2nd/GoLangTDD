@@ -1,13 +1,23 @@
 package poker
 
-import "time"
+import (
+	"io"
+	"time"
+)
 
 type TexasHoldem struct {
 	alerter BlindAlerter
 	store   PlayerStore
 }
 
-func (p TexasHoldem) Start(numberOfPlayers int) {
+func NewTexasHoldem(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
+	return &TexasHoldem{
+		alerter: alerter,
+		store:   store,
+	}
+}
+
+func (p TexasHoldem) Start(numberOfPlayers int, alertsDestination io.Writer) {
 
 	if numberOfPlayers <= 5 {
 		numberOfPlayers = 5
@@ -17,18 +27,11 @@ func (p TexasHoldem) Start(numberOfPlayers int) {
 	blindTime := 0 * time.Second
 
 	for _, blind := range blinds {
-		p.alerter.ScheduleAlertAt(blindTime, blind)
+		p.alerter.ScheduleAlertAt(blindTime, blind, alertsDestination)
 		blindTime = blindTime + blindIncrement
 	}
 }
 
 func (p TexasHoldem) Finish(winner string) {
 	p.store.RecordWin(winner)
-}
-
-func NewGame(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
-	return &TexasHoldem{
-		alerter: alerter,
-		store:   store,
-	}
 }
