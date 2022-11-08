@@ -11,7 +11,8 @@ type playerServerWS struct {
 	*websocket.Conn
 }
 
-/*
+// make player server implement write so now its io.Writer!!
+
 func (w *playerServerWS) Write(p []byte) (n int, err error) {
 	err = w.WriteMessage(websocket.TextMessage, p)
 
@@ -21,8 +22,6 @@ func (w *playerServerWS) Write(p []byte) (n int, err error) {
 
 	return len(p), nil
 }
-
-*/
 
 func newPlayerServerWS(w http.ResponseWriter, r *http.Request) *playerServerWS {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)

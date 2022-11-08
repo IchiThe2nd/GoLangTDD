@@ -8,6 +8,7 @@ import (
 	"poker"
 	"strings"
 	"testing"
+	"time"
 )
 
 // CLI_test.go
@@ -21,14 +22,16 @@ var dummyStdOut = &bytes.Buffer{}
 type GameSpy struct {
 	StartCalled     bool
 	StartCalledWith int
+	BlindAlert      []byte
 
 	FinishedCalled   bool
 	FinishCalledWith string
 }
 
-func (g *GameSpy) Start(numberOfPlayers int, alertsDestination io.Writer) {
+func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
 	g.StartCalledWith = numberOfPlayers
 	g.StartCalled = true
+	out.Write(g.BlindAlert)
 }
 
 func (g *GameSpy) Finish(winner string) {
@@ -87,9 +90,15 @@ func TestCLI(t *testing.T) {
 
 func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayersWanted int) {
 	t.Helper()
-	if game.StartCalledWith != numberOfPlayersWanted {
-		t.Errorf("wanted start called with %d but got %d", numberOfPlayersWanted, game.StartCalledWith)
+
+	passed := retryUntil(1000*time.Millisecond, func() bool {
+		return game.StartCalledWith == numberOfPlayersWanted
+	})
+
+	if !passed {
+		t.Errorf("expected start called with %q  but got %q", numberOfPlayersWanted, game.StartCalledWith)
 	}
+
 }
 
 func assertGameNotStarted(t testing.TB, game *GameSpy) {
@@ -101,10 +110,24 @@ func assertGameNotStarted(t testing.TB, game *GameSpy) {
 
 func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
 	t.Helper()
-	if game.FinishCalledWith != winner {
-		t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
-	}
 
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishCalledWith == winner
+	})
+
+	if !passed {
+		t.Errorf("expected finish called with %q  but got %q", winner, game.FinishCalledWith)
+	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 
 func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
