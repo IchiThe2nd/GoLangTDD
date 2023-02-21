@@ -3,7 +3,6 @@ package poker
 import (
 	"os"
 	"testing"
-)
 
 func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 	t.Helper()
