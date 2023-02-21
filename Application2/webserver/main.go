@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/IchiThe2nd/GoLangTDD/tree/main/Application2"
+	"github.com/IchiThe2nd/GoLangTDD/tree/main/Application2/poker"
 )
 )
 
